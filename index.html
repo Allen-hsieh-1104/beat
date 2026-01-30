@@ -17,6 +17,8 @@
             padding: 20px 0; 
             margin: 0;
             overflow-x: hidden;
+
+            /* iPad 150% 縮放設定 */
             transform: scale(1.5);
             transform-origin: top center;
             width: 66.66%; 
@@ -119,12 +121,12 @@
             const audio = document.getElementById('bgm-player');
             const startBtn = document.getElementById('start-btn');
             
-            // 判斷是否支援錄影 API (PC端)
-            const isPC = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+            // 檢查是否為 PC 端（支援螢幕錄影 API）
+            const isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
 
-            if (isPC) {
+            if (isSupported) {
                 try {
-                    // 等待使用者按下「確認分享」
+                    // 等待使用者按下「確認分享」彈窗
                     const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                     recorder = new MediaRecorder(stream);
                     recordedChunks = [];
@@ -132,20 +134,20 @@
                     recorder.onstop = triggerDownload;
                     recorder.start();
                     
-                    // 【關鍵：確認分享後才跑這裡】
+                    // 確認分享後，正式啟動音樂與遊戲流
                     runGameFlow(audio, startBtn);
                 } catch (err) {
-                    alert("必須確認分享螢幕才能開始同步錄影！");
+                    alert("必須確認分享螢幕才能開始同步挑戰！");
                 }
             } else {
-                // iPad/行動端直接啟動
+                // iPad 或不支援錄影的裝置直接啟動遊戲
                 runGameFlow(audio, startBtn);
             }
         }
 
         function runGameFlow(audio, startBtn) {
             startBtn.style.display = 'none';
-            audio.play(); // 音樂與遊戲同步啟動
+            audio.play(); 
 
             const introTime = 4000; 
             const gapTime = 3000;   
