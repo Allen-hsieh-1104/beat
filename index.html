@@ -8,22 +8,12 @@
         :root { --green: #00FF00; --bg: #121212; --card-bg: #252525; }
         
         body { 
-            background: var(--bg); 
-            color: white; 
+            background: var(--bg); color: white; 
             font-family: "Microsoft JhengHei", sans-serif; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            padding: 20px 0; 
-            margin: 0;
-            overflow-x: hidden;
-
-            /* iPad 150% 縮放設定 */
-            transform: scale(1.5);
-            transform-origin: top center;
-            width: 66.66%; 
-            margin-left: auto;
-            margin-right: auto;
+            display: flex; flex-direction: column; align-items: center; 
+            padding: 20px 0; margin: 0; overflow-x: hidden;
+            transform: scale(1.5); transform-origin: top center;
+            width: 66.66%; margin-left: auto; margin-right: auto;
         }
 
         .container { width: 100%; max-width: 900px; text-align: center; }
@@ -62,7 +52,6 @@
             <div class="game-grid" id="game-grid"></div>
             <button class="btn btn-green" id="start-btn" onclick="launchEngine()">開始挑戰</button>
             <p id="finish-msg" style="display:none; color: #ff4444; font-size: 20px;">挑戰結束！</p>
-            <p id="ios-tip" style="color: #666; font-size: 12px; margin-top: 10px;">註：iPad 版請手動開啟系統螢幕錄影</p>
         </div>
 
         <footer>© 2026 Allen Hsieh. All Rights Reserved.</footer>
@@ -121,26 +110,23 @@
             const audio = document.getElementById('bgm-player');
             const startBtn = document.getElementById('start-btn');
             
-            // 檢查是否為 PC 端（支援螢幕錄影 API）
-            const isSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
+            // 判斷是否支援錄影 API (排除 iOS/iPad)
+            const isPC = !!(navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia);
 
-            if (isSupported) {
+            if (isPC) {
                 try {
-                    // 等待使用者按下「確認分享」彈窗
                     const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                     recorder = new MediaRecorder(stream);
                     recordedChunks = [];
                     recorder.ondataavailable = e => recordedChunks.push(e.data);
                     recorder.onstop = triggerDownload;
                     recorder.start();
-                    
-                    // 確認分享後，正式啟動音樂與遊戲流
-                    runGameFlow(audio, startBtn);
+                    runGameFlow(audio, startBtn); // 確認後才開始
                 } catch (err) {
-                    alert("必須確認分享螢幕才能開始同步挑戰！");
+                    console.log("使用者取消分享");
                 }
             } else {
-                // iPad 或不支援錄影的裝置直接啟動遊戲
+                // iPad 直接開跑，不跳任何錄影請求
                 runGameFlow(audio, startBtn);
             }
         }
@@ -156,7 +142,6 @@
 
             for (let r = 0; r < 5; r++) {
                 const roundStartTime = introTime + (r * cycleTime);
-                
                 setTimeout(() => {
                     document.getElementById('status-text').innerText = `ROUND ${r+1} 準備`;
                     shuffleAndFillCards();
